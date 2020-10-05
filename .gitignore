@@ -40,6 +40,11 @@
 # IntelliJ
 out/
 *.iml
+.idea
 
 # Zip consegnati
 *.zip
+
+# File DS_Store
+.DS_Store
+*.DS_Store
