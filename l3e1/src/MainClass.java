@@ -38,18 +38,20 @@ public class MainClass {
     public static void main(String[] args) {
         Reader[] readers = new Reader[NUM_READERS];
         Writer[] writers = new Writer[NUM_WRITERS];
+        Counter c;
+        ExecutorService threadPool;
 
         // implementazione NON thread safe
         System.out.println("Implementazione non thread-safe");
 
-        Counter c = new Counter();
+        c = new Counter();
 
         for (int i = 0; i < NUM_READERS; i++) {
             readers[i] = new Reader(i, c);
             writers[i] = new Writer(i, c);
         }
 
-        ExecutorService threadPool = Executors.newCachedThreadPool();
+        threadPool = Executors.newCachedThreadPool();
 
         for (Writer w : writers) {
             threadPool.submit(w);
