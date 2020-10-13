@@ -1,3 +1,5 @@
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -32,9 +34,14 @@ public class Tutor implements Runnable {
                 }
             } else if (utente instanceof Tesista) {
                 int postazioneRichiesta = ((Tesista)utente).getPostazioneRichiesta();
-                if (laboratorio.isAvailable(postazioneRichiesta)) {
-                    coda.poll();
-                    this.giveAccess(utente);
+                try {
+                    if (laboratorio.isAvailable(postazioneRichiesta)) {
+                        coda.poll();
+                        this.giveAccess(utente);
+                    }
+                }
+                catch (IllegalArgumentException e) { // WHATTT???/
+                    e.printStackTrace();
                 }
             } else {
                 int postazioneOttenuta = laboratorio.getFirstAvailable();

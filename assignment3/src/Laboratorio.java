@@ -1,4 +1,5 @@
-import java.security.InvalidParameterException;
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -69,8 +70,8 @@ public class Laboratorio {
         return guard;
     }
 
-    public boolean isAvailable(int pos) throws InvalidParameterException {
-        if (pos < 0 || pos >= NUM_POSTAZIONI) throw new InvalidParameterException();
+    public boolean isAvailable(int pos) throws IllegalArgumentException {
+        if (pos < 0 || pos >= NUM_POSTAZIONI) throw new IllegalArgumentException();
         boolean guard;
         lock.lock();
         guard = postazioni[pos].getStato() == Computer.Stato.LIBERO;
