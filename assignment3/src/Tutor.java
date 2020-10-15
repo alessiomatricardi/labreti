@@ -38,39 +38,41 @@ public class Tutor implements Runnable {
     }
 
     public void autorizza (Utente utente) {
+        // Professore
         if (utente instanceof Professore) {
-            if (laboratorio.giveFullAccess()) { // se lab vuoto, gli do l'accesso
-                coda.remove();
-                utente.authorize();
+            if (laboratorio.giveFullAccess()) { // se lab vuoto, gli do completo accesso
+                coda.remove(); // rimuovo dalla coda
+                utente.autorizzaUtente(); // autorizzo a usare il pc
                 System.out.format("Tutor: Autorizzo Professore %d\n", utente.getIndex());
 
                 // aspetto che professore finisca altrimenti faccio solo attesa attiva
+                // finchè un professore sta usando l'aula, nessuno potrà accedere
                 laboratorio.waitUntilFull();
             }
             return;
         }
-
+        // Tesista
         if (utente instanceof Tesista) {
             int postazioneRichiesta = ((Tesista)utente).getPostazioneRichiesta();
             try {
-                if (laboratorio.giveAccess(postazioneRichiesta)) {
+                if (laboratorio.giveAccess(postazioneRichiesta)) { // gli do l'accesso se quella postazione è disponibile
                     coda.remove();
-                    utente.authorize();
-                    System.out.format("Tutor: Autorizzo Tesista %d alla postazione %d\n", utente.getIndex(), ((Tesista) utente).getPostazioneRichiesta());
+                    utente.autorizzaUtente();
+                    System.out.format("Tutor: Autorizzo Tesista %d alla postazione %d\n", utente.getIndex(), postazioneRichiesta);
                 }
             }
-            catch (IllegalArgumentException e) { // WHATTT???
+            catch (IllegalArgumentException e) { // WHATTT??? impossibile che pos sia sbagliato, ma vabbè
                 e.printStackTrace();
             }
             return;
         }
-
+        // Studente
         if (utente instanceof Studente) {
             int postazioneOttenuta;
             if ((postazioneOttenuta = laboratorio.giveAccess()) != Laboratorio.NO_AVAILABLE) {
                 coda.remove();
                 ((Studente)utente).setPostazioneOttenuta(postazioneOttenuta);
-                utente.authorize();
+                utente.autorizzaUtente();
                 System.out.format("Tutor: Autorizzo Studente %d alla postazione %d\n", utente.getIndex(), postazioneOttenuta);
             }
         }

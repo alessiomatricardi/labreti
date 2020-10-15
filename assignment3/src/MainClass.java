@@ -9,6 +9,7 @@ public class MainClass {
      * @param args (numero professori, numero tesisti, numero studenti)
      * */
     public static void main(String[] args) {
+        // controllo parametri
         if (args.length != 3) {
             System.out.println("Uso: ./MainClass <professori> <tesisti> <studenti>");
             return;
@@ -25,6 +26,7 @@ public class MainClass {
             return;
         }
 
+        // istanzio laboratorio e coda di utenti
         Laboratorio laboratorioMarzotto = new Laboratorio();
         PriorityBlockingQueue<Utente> queue = new PriorityBlockingQueue<>(Tutor.INITIAL_CAPACITY, new UserComparator());
 
@@ -33,9 +35,11 @@ public class MainClass {
         Studente[] studenti = new Studente[numStudenti];
         Tutor tutor = new Tutor(laboratorioMarzotto, queue);
 
+        // pool di thread per gli utenti e thread unico per il tutor
         ExecutorService userThreads = Executors.newCachedThreadPool();
         Thread tutorThread = new Thread(tutor);
 
+        // istanze e esecuzione dei thread
         for (int i = 0; i < numProfessori; i++) {
             professori[i] = new Professore(i, queue, laboratorioMarzotto);
             userThreads.execute(professori[i]);
@@ -61,6 +65,7 @@ public class MainClass {
             }
         }
 
+        // interrompo il thread Tutor quando non ho più utenti
         tutorThread.interrupt();
 
         try {
@@ -69,6 +74,8 @@ public class MainClass {
         catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        System.out.println("È tardi, il " + laboratorioMarzotto.getNomeLab() + " chiude.");
     }
 
 }

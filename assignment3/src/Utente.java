@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class Utente implements Runnable {
     // Costanti
     private static final int MAX_K = 4;
-    private static final int MAX_PERMANENZA_MS = 2000;
+    private static final int MAX_PERMANENZA_MS = 1000;
     private static final int MAX_INTERVALLO_MS = 1000;
 
     private final int idx; // indice univoco dell'utente
@@ -25,7 +25,7 @@ public abstract class Utente implements Runnable {
     private final Condition condAuthorized;
     private boolean authorized; // autorizzato ad accedere?
 
-    public Utente (int idx, PriorityBlockingQueue<Utente> queue, Laboratorio lab) {
+    public Utente(int idx, PriorityBlockingQueue<Utente> queue, Laboratorio lab) {
         this.idx = idx;
         kRichieste = ThreadLocalRandom.current().nextInt(1, MAX_K + 1);
         ultimaPrenotazione = null;
@@ -42,7 +42,7 @@ public abstract class Utente implements Runnable {
             // Richiedi utilizzo della postazione
             this.vaiInCoda();
 
-            System.out.format("%s %d: utilizzo il/i PC per la %d volta\n", this.getClass().getSimpleName(), this.idx, i+1);
+            System.out.format("%s %d: utilizzo il/i PC per la %d/%d volta\n", this.getClass().getSimpleName(), this.idx, i + 1, kRichieste);
             // Utilizza postazione
             this.utilizzaPC();
 
@@ -55,42 +55,6 @@ public abstract class Utente implements Runnable {
         System.out.format("%s %d: ho finito\n", this.getClass().getSimpleName(), this.idx);
     }
 
-    private void utilizzaPC () {
-        int time = ThreadLocalRandom.current().nextInt(0, MAX_PERMANENZA_MS + 1);
-        try {
-            Thread.sleep(time);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void aspettaIntervallo () {
-        try {
-            Thread.sleep(intervalloAccessi);
-        }
-        catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public LocalDateTime getUltimaPrenotazione() {
-        return this.ultimaPrenotazione;
-    }
-
-    private void setUltimaPrenotazione() {
-        this.ultimaPrenotazione = LocalDateTime.now();
-    }
-
-    public void authorize() {
-        lockUtente.lock();
-
-        authorized = true;
-        condAuthorized.signal();
-
-        lockUtente.unlock();
-    }
-
     private void vaiInCoda() {
         lockUtente.lock();
 
@@ -100,8 +64,7 @@ public abstract class Utente implements Runnable {
         while (!this.authorized) {
             try {
                 condAuthorized.await();
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -109,7 +72,41 @@ public abstract class Utente implements Runnable {
         lockUtente.unlock();
     }
 
-    protected abstract void notificaUscita();
+    private void utilizzaPC() {
+        int time = ThreadLocalRandom.current().nextInt(0, MAX_PERMANENZA_MS + 1);
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected abstract void notificaUscita(); // implementato nelle classi concrete
+
+    private void aspettaIntervallo() {
+        try {
+            Thread.sleep(intervalloAccessi);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void autorizzaUtente() {
+        lockUtente.lock();
+
+        authorized = true;
+        condAuthorized.signal();
+
+        lockUtente.unlock();
+    }
+
+    public LocalDateTime getUltimaPrenotazione() {
+        return this.ultimaPrenotazione;
+    }
+
+    private void setUltimaPrenotazione() {
+        this.ultimaPrenotazione = LocalDateTime.now();
+    }
 
     public int getIndex() {
         return idx;
