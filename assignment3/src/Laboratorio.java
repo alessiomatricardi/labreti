@@ -8,7 +8,7 @@ public class Laboratorio {
 
     /**
      * Rappresenta un computer del laboratorio
-     * <p>
+     *
      * La dichiarazione è privata per non consentire a nessuno,
      * all'infuori del laboratorio, di accedervi.
      */
