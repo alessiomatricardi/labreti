@@ -17,10 +17,10 @@ public class Producer implements Runnable {
         File mainPath = new File(path);
         if(!mainPath.isDirectory()) {
             System.out.format("Producer: Il path '%s non è una directory o non è esistente\n", path);
-            coda.jobIsDone();
+            coda.jobIsDone(); // dico a tutti i consumatori che ho finito
             return;
         }
-        recursiveDir(mainPath);
+        recursiveDir(mainPath); // funzione ricorsiva che analizza tutto l'albero della directory
         coda.jobIsDone();
         System.out.format("Producer: Lavoro finito\n");
     }

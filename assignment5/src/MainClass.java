@@ -13,6 +13,7 @@ public class MainClass {
         // check numero argomenti
         if(args.length != 1) {
             System.out.format("Errore! Numero di parametri passato: %d, numero di parametri atteso: 1\n", args.length);
+            System.out.format("Usage: java MainClass <path>\n");
             return;
         }
         // path directory principale
@@ -22,6 +23,7 @@ public class MainClass {
             System.out.format("Il path '%s' non corrisponde ad una directory oppure essa non è esistente\n", mainPath);
             return;
         }
+
         ConcurrentQueue coda = new ConcurrentQueue();
 
         Consumer[] consumers = new Consumer[K];
