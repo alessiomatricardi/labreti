@@ -1,7 +1,7 @@
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,17 +18,19 @@ public class ContoCorrente {
     }
 
     public static class Movimento {
-
-        private Date data;
+        private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        private LocalDateTime data;
         private Causale causale;
 
-        public Movimento (Date data, Causale causale) {
+        public Movimento (LocalDateTime data, Causale causale) {
             this.data = data;
             this.causale = causale;
         }
 
+        public Movimento() {}
+
         public String getData() {
-            return this.data.toString();
+            return this.data.format(formatter);
         }
 
         public String getCausale() {
@@ -40,11 +42,9 @@ public class ContoCorrente {
          *
          */
         public void setData(String dataString) {
-            String JsonPattern = "E MMM dd HH:mm:ss zzz yyyy";
-            SimpleDateFormat formatter = new SimpleDateFormat(JsonPattern);
             try {
-                data = formatter.parse(dataString);
-            } catch (ParseException e) {
+                data = LocalDateTime.parse(dataString, formatter);
+            } catch (DateTimeParseException e) {
                 e.printStackTrace();
             }
         }
@@ -64,6 +64,8 @@ public class ContoCorrente {
         this.cognome = cognome;
         this.movimenti = new ArrayList<Movimento>();
     }
+
+    public ContoCorrente() {}
 
     public String getNome() {
         return this.nome;

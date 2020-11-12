@@ -1,7 +1,9 @@
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -37,12 +39,12 @@ public class MainClass {
             System.out.println("Il file " + inputFile.getPath() + " non esiste o non può essere letto.");
             return;
         }
-        ContoCorrente[] contiCorrenti;
+        List<ContoCorrente> contiCorrenti;
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, SafeCounter> counters = getCounters();
         ExecutorService threadPool = Executors.newCachedThreadPool();
         try {
-            contiCorrenti = objectMapper.readValue(inputFile, ContoCorrente[].class);
+            contiCorrenti = objectMapper.readValue(inputFile, new TypeReference<List<ContoCorrente>>(){});
             for (ContoCorrente conto : contiCorrenti) {
                 threadPool.submit(new Analizzatore(counters, conto));
             }

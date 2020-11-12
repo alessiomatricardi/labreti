@@ -19,7 +19,7 @@ public class Analizzatore implements Runnable {
         String surname = contoCorrente.getCognome();
         List<ContoCorrente.Movimento> movimenti = contoCorrente.getMovimenti();
 
-        System.out.format("Conto corrente di %s %s\n", name, surname);
+        // System.out.format("Conto corrente di %s %s\n", name, surname);
 
         for (ContoCorrente.Movimento mov : movimenti) {
             SafeCounter c = counters.get(mov.getCausale());

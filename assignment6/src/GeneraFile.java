@@ -2,6 +2,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -17,7 +19,7 @@ public class GeneraFile {
     public static final int NUM_CORRENTISTI = 100;
     public static final int MIN_MOVIMENTI = 50;
     public static final int MAX_MOVIMENTI = 600;
-    public static final long TWO_YEARS_AGO_MSEC = 63113852000L;
+    public static final long TWO_YEARS_AGO_SEC = 63115200L;
     public static final String outFile = "conticorrenti.json";
 
     public static String getRandomName() {
@@ -30,11 +32,11 @@ public class GeneraFile {
         return cognomi[pos];
     }
 
-    public static Date getRandomDate() {
-        long oggi = new Date().getTime(); // esattamente questo momento
-        long prima = oggi - TWO_YEARS_AGO_MSEC; // 2 anni fa
-        long randomDay = ThreadLocalRandom.current().nextLong(prima, oggi);
-        return new Date(randomDay);
+    public static LocalDateTime getRandomDate() {
+        long oggi = new Date().getTime() / 1000; // esattamente questo momento
+        long prima = oggi - TWO_YEARS_AGO_SEC; // 2 anni fa
+        long randomSecond = ThreadLocalRandom.current().nextLong(prima, oggi);
+        return LocalDateTime.ofEpochSecond(randomSecond, 0, ZoneOffset.UTC);
     }
 
     public static ContoCorrente.Causale getRandomCausal() {
@@ -50,7 +52,7 @@ public class GeneraFile {
 
             int num_movimenti = ThreadLocalRandom.current().nextInt(MIN_MOVIMENTI, MAX_MOVIMENTI + 1);
 
-            Date data;
+            LocalDateTime data;
             ContoCorrente.Causale causale;
             ContoCorrente.Movimento m;
             while (num_movimenti-- > 0) {
