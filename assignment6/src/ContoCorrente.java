@@ -1,3 +1,5 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,19 +32,25 @@ public class ContoCorrente {
         }
 
         public String getCausale() {
-            switch (this.causale) {
-                case BONIFICO :
-                    return "Bonifico";
-                case ACCREDITO:
-                    return "Accredito";
-                case BOLLETTINO:
-                    return "Bollettino";
-                case F24:
-                    return "F24";
-                case PAGOBANCOMAT:
-                    return "PagoBancomat";
+            return causale.toString();
+        }
+
+        /* Helpful link for string to date conversion
+         * https://stackoverflow.com/questions/4216745/java-string-to-date-conversion
+         *
+         */
+        public void setData(String dataString) {
+            String JsonPattern = "E MMM dd HH:mm:ss zzz yyyy";
+            SimpleDateFormat formatter = new SimpleDateFormat(JsonPattern);
+            try {
+                data = formatter.parse(dataString);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
-            return "N/D";
+        }
+
+        public void setCausale(String sCausale) {
+            causale = Causale.valueOf(sCausale);
         }
 
     }
@@ -67,6 +75,18 @@ public class ContoCorrente {
 
     public List<Movimento> getMovimenti() {
         return this.movimenti;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setCognome(String cognome) {
+        this.cognome = cognome;
+    }
+
+    public void setMovimenti(List<Movimento> movs) {
+        movimenti = movs;
     }
 
     public void aggiungiMovimento(Movimento m) {
