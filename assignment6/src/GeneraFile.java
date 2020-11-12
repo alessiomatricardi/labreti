@@ -1,7 +1,10 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -20,7 +23,8 @@ public class GeneraFile {
     public static final int MIN_MOVIMENTI = 50; // numero minimo di movimenti di ogni correntista
     public static final int MAX_MOVIMENTI = 600; // numero massimo di movimenti di ogni correntista
     public static final long TWO_YEARS_AGO_SEC = 63115200L; // 2 anni in secondi
-    public static final String outFile = "conticorrenti.json"; // nome del file da generare
+    public static final String OUT_FILENAME = "conticorrenti.json"; // nome del file da generare
+    public static final int BUFFER_SIZE = 1024*1024; // spazio di allocazione del buffer
 
     // restituisce un nome random dall'array nomi
     public static String getRandomName() {
@@ -66,15 +70,39 @@ public class GeneraFile {
             }
         }
 
-        // serializzazione
-        // Utilizzo libreria jackson per creazione JSON
+        /* serializzazione
+         * Utilizzo libreria jackson per creazione JSON
+         * Utilizzo di NIO per salvataggio su file
+         */
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            File file = new File(outFile);
-            file.createNewFile();
+            FileChannel outChannel = FileChannel.open(Paths.get(OUT_FILENAME), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 
-            System.out.println("Scrivo su file JSON");
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, contiCorrenti);
+            // scrivo json su array di byte
+            byte[] outputJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(contiCorrenti);
+
+            int start = 0;
+            int offset;
+            int length = outputJson.length;
+
+            // copio array di byte su file con NIO
+            while (start < length) {
+                if ((length - start) >= BUFFER_SIZE) {
+                    offset = BUFFER_SIZE;
+                } else {
+                    offset = length - start;
+                }
+                buffer.put(outputJson, start, offset);
+                start += offset;
+
+                buffer.flip();
+                while(buffer.hasRemaining()) {
+                    outChannel.write(buffer);
+                }
+                buffer.clear();
+            }
+            outChannel.close();
         }
         catch (IOException e) {
             e.printStackTrace();

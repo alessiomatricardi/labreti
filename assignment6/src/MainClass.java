@@ -1,8 +1,10 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,7 +16,9 @@ import java.util.concurrent.TimeUnit;
  * Created by alessiomatricardi on 11/11/2020
  */
 public class MainClass {
-    public static final String defaultInFile = "conticorrenti.json"; // file di default che viene provato ad aprire
+    public static final String IN_FILENAME = "conticorrenti.json"; // file di default che viene provato ad aprire
+    public static final int BUFFER_SIZE = 1024*1024; // spazio di allocazione del buffer
+    public static final int EOS = -1; // end of stream
 
     /*
     * restituisce una struttura dati Map (TreeMap)
@@ -34,12 +38,12 @@ public class MainClass {
 
         /*
         * il programma accetta 0 o 1 argomento
-        * 0 argomenti: proverà ad utilizzare il file di default dafaultInFile
+        * 0 argomenti: proverà ad utilizzare il file di default IN_FILENAME
         * 1 argomento: path del file json da analizzare
         * */
         if(args.length == 0) {
-            System.out.println("Nessun file passato come parametro, proverò ad aprire il file " + defaultInFile);
-            inputFile = new File(defaultInFile);
+            System.out.println("Nessun file passato come parametro, proverò ad aprire il file " + IN_FILENAME);
+            inputFile = new File(IN_FILENAME);
         } else if (args.length == 1) {
             inputFile = new File(args[0]);
         } else {
@@ -48,25 +52,39 @@ public class MainClass {
         }
 
         if(!inputFile.canRead()) {
-            System.out.println("Il file " + inputFile.getAbsolutePath() + " non esiste o non può essere letto.");
+            System.out.println("Il file " + inputFile.getAbsolutePath() + " non esiste o non può essere aperto in lettura.");
             return;
         }
 
-        List<ContoCorrente> contiCorrenti;
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, SafeCounter> counters = getCounters();
-        ExecutorService threadPool = Executors.newCachedThreadPool();
+        List<ContoCorrente> contiCorrenti = null;
 
         // deserializzazione
         try {
-            contiCorrenti = objectMapper.readValue(inputFile, new TypeReference<List<ContoCorrente>>(){});
-            for (ContoCorrente conto : contiCorrenti) {
-                threadPool.submit(new Analizzatore(counters, conto));
+            FileChannel inChannel = new FileInputStream(inputFile).getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+            StringBuilder tmp = new StringBuilder(); // stringa dinamica
+            while(inChannel.read(buffer) != EOS) {
+                buffer.flip();
+                tmp.append(StandardCharsets.UTF_8.decode(buffer)); // necessario per decodificare il buffer
+                buffer.clear();
             }
-        } catch (IOException e) {
+            contiCorrenti = objectMapper.readValue(tmp.toString(), new TypeReference<List<ContoCorrente>>(){});
+            inChannel.close();
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
 
+        Map<String, SafeCounter> counters = getCounters();
+        ExecutorService threadPool = Executors.newCachedThreadPool();
+        if(contiCorrenti != null) {
+            for (ContoCorrente conto : contiCorrenti) {
+                threadPool.submit(new Analizzatore(counters, conto));
+            }
+        }
+
+        // termino threadpool
         threadPool.shutdown();
         while(!threadPool.isTerminated()) {
             try {
@@ -79,7 +97,7 @@ public class MainClass {
         // stampo risultato
         for(String key: counters.keySet()) {
             SafeCounter c = counters.get(key);
-            System.out.format("Sono stati fatti %d movimenti con causale %s\n", c.getValue(), key);
+            System.out.format("Sono stati effetuati %d movimenti con causale %s\n", c.getValue(), key);
         }
     }
 
