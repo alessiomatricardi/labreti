@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class ContoCorrente {
 
+    // possibili causali di un movimento
     public enum Causale {
         BONIFICO,
         ACCREDITO,
@@ -17,8 +18,10 @@ public class ContoCorrente {
         PAGOBANCOMAT
     }
 
+    // classe Movimento (bancario), appartiene alla classe ContoCorrente
     public static class Movimento {
-        private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // utile per avere una corrispondenza immediata Data <---> Stringa rappresentante una data
+        private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         private LocalDateTime data;
         private Causale causale;
 
@@ -27,7 +30,7 @@ public class ContoCorrente {
             this.causale = causale;
         }
 
-        public Movimento() {}
+        public Movimento() {} // necessario per deserializzazione
 
         public String getData() {
             return this.data.format(formatter);
@@ -49,7 +52,7 @@ public class ContoCorrente {
             }
         }
 
-        public void setCausale(String sCausale) {
+        public void setCausale(String sCausale) throws IllegalArgumentException {
             causale = Causale.valueOf(sCausale);
         }
 
@@ -65,7 +68,7 @@ public class ContoCorrente {
         this.movimenti = new ArrayList<Movimento>();
     }
 
-    public ContoCorrente() {}
+    public ContoCorrente() {} // necessario per deserializzazione
 
     public String getNome() {
         return this.nome;

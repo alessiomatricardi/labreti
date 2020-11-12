@@ -1,6 +1,10 @@
 /**
  * Created by alessiomatricardi on 12/11/2020
  */
+
+/*
+* Implementazione di un contatore condiviso attraverso monitor
+* */
 public class SafeCounter {
     private long counter;
 
@@ -12,7 +16,7 @@ public class SafeCounter {
         counter++;
     }
 
-    public synchronized long getCounter() {
+    public synchronized long getValue() {
         return counter;
     }
 }
