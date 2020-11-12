@@ -62,7 +62,7 @@ public class MainClass {
         // deserializzazione
         try {
             FileChannel inChannel = new FileInputStream(inputFile).getChannel();
-            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+            ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
             StringBuilder tmp = new StringBuilder(); // stringa dinamica
             while(inChannel.read(buffer) != EOS) {
                 buffer.flip();

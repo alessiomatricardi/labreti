@@ -77,24 +77,24 @@ public class GeneraFile {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             FileChannel outChannel = FileChannel.open(Paths.get(OUT_FILENAME), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+            ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 
             // scrivo json su array di byte
             byte[] outputJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(contiCorrenti);
 
             int start = 0;
-            int offset;
-            int length = outputJson.length;
+            int len;
+            int size = outputJson.length;
 
             // copio array di byte su file con NIO
-            while (start < length) {
-                if ((length - start) >= BUFFER_SIZE) {
-                    offset = BUFFER_SIZE;
+            while (start < size) {
+                if ((size - start) >= BUFFER_SIZE) {
+                    len = BUFFER_SIZE;
                 } else {
-                    offset = length - start;
+                    len = size - start;
                 }
-                buffer.put(outputJson, start, offset);
-                start += offset;
+                buffer.put(outputJson, start, len);
+                start += len;
 
                 buffer.flip();
                 while(buffer.hasRemaining()) {
