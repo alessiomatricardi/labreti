@@ -11,8 +11,8 @@ import java.util.Date;
 public class Worker implements Runnable {
     private Socket connection;
     private static final String CRLF = "\r\n"; // codifica EOF
-    private static final String OK_200_HEADER_LINE = "HTTP/1.1 200 OK" + CRLF;
-    private static final String NOT_FOUND_404_HEADER_LINE = "HTTP/1.1 404 Not Found" + CRLF;
+    private static final String OK_200_STATUS_LINE = "HTTP/1.1 200 OK" + CRLF;
+    private static final String NOT_FOUND_404_STATUS_LINE = "HTTP/1.1 404 Not Found" + CRLF;
 
     public Worker(Socket connection) {
         this.connection = connection;
@@ -118,7 +118,7 @@ public class Worker implements Runnable {
     private byte[] getResponseHeader(String mimeType, long length) {
         SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
 
-        String header = OK_200_HEADER_LINE
+        String header = OK_200_STATUS_LINE
                         + "Server: localhost - Assignment 7" + CRLF
                         + "Date: " + formatter.format(new Date()) + CRLF
                         + "Content-Type: " + mimeType + "; charset=UTF-8" + CRLF
@@ -132,6 +132,6 @@ public class Worker implements Runnable {
      * Restituisce header di risposta HTTP 404 Not Found
      * */
     private byte[] getNotFoundResponse() {
-        return NOT_FOUND_404_HEADER_LINE.getBytes(StandardCharsets.UTF_8);
+        return NOT_FOUND_404_STATUS_LINE.getBytes(StandardCharsets.UTF_8);
     }
 }
