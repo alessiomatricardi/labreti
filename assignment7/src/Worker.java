@@ -10,9 +10,9 @@ import java.util.Date;
  */
 public class Worker implements Runnable {
     private Socket connection;
-    private static final String CRLF = "\r\n";
-    private static final String OK_200_HEADER = "HTTP/1.1 200 OK" + CRLF;
-    private static final String NOT_FOUND_404_HEADER = "HTTP/1.1 404 Not Found" + CRLF;
+    private static final String CRLF = "\r\n"; // codifica EOF
+    private static final String OK_200_HEADER_LINE = "HTTP/1.1 200 OK" + CRLF;
+    private static final String NOT_FOUND_404_HEADER_LINE = "HTTP/1.1 404 Not Found" + CRLF;
 
     public Worker(Socket connection) {
         this.connection = connection;
@@ -28,7 +28,7 @@ public class Worker implements Runnable {
             // ottieni richiesta
             StringBuilder request = new StringBuilder();
             String line;
-            String requestLine = "";
+            String requestLine = ""; // prima riga di una richiesta HTTP
             while ((line = readFromClient.readLine()) != null) {
                 if (requestLine.isEmpty()) {
                     requestLine = line;
@@ -40,7 +40,7 @@ public class Worker implements Runnable {
                 }
             }
 
-            System.out.println(request);
+            //System.out.println(request);
             String filename = getRequestedFilename(requestLine);
             //System.out.println(filename);
 
@@ -48,10 +48,14 @@ public class Worker implements Runnable {
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
 
+                // scrivo il file come sequenza di byte su un array
                 byte[] byteFile = new byte[(int) file.length()];
                 fileInputStream.read(byteFile);
 
+                // from https://www.baeldung.com/java-file-mime-type
                 String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+
+                // scrivo response header e data su outputstream del socket
                 outToClient.write(getResponseHeader(mimeType, file.length()));
                 outToClient.write(byteFile);
                 outToClient.flush();
@@ -60,6 +64,7 @@ public class Worker implements Runnable {
 
             }
             catch (FileNotFoundException e) {
+                // se il file non è stato trovato, il response header sarà 404 Not Found
                 outToClient.write(getNotFoundResponse());
                 outToClient.flush();
             }
@@ -72,6 +77,15 @@ public class Worker implements Runnable {
         }
     }
 
+    /**
+     * restituisce il path del file richiesto dal client
+     * se il path non fa riferimento a nessun file specifico,
+     * restituisce il file index.html appartenente a quel path.
+     *
+     * @param requestLine request line dell'header HTTP
+     * @return path del file
+     *
+     * */
     private String getRequestedFilename(String requestLine) {
         /*
          * Secondo RFC 7230
@@ -85,10 +99,26 @@ public class Worker implements Runnable {
         return tokens[1];
     }
 
+    /**
+     * restituisce un header di risposta HTTP con status code 200
+     * completo dei campi
+     * - Server
+     * - Data
+     * - Content-Type
+     * - Connection
+     * - Content-Length
+     * in formato array di byte
+     *
+     *
+     * @param mimeType MIME type (Content-Type)
+     * @param length lunghezza del file in byte
+     * @return header di risposta HTTP in formato array di byte
+     *
+     * */
     private byte[] getResponseHeader(String mimeType, long length) {
         SimpleDateFormat formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
 
-        String header = OK_200_HEADER
+        String header = OK_200_HEADER_LINE
                         + "Server: localhost - Assignment 7" + CRLF
                         + "Date: " + formatter.format(new Date()) + CRLF
                         + "Content-Type: " + mimeType + "; charset=UTF-8" + CRLF
@@ -98,7 +128,10 @@ public class Worker implements Runnable {
         return header.getBytes(StandardCharsets.UTF_8);
     }
 
+    /**
+     * Restituisce header di risposta HTTP 404 Not Found
+     * */
     private byte[] getNotFoundResponse() {
-        return NOT_FOUND_404_HEADER.getBytes(StandardCharsets.UTF_8);
+        return NOT_FOUND_404_HEADER_LINE.getBytes(StandardCharsets.UTF_8);
     }
 }
