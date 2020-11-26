@@ -88,3 +88,10 @@ Ulteriori indicazioni
 - le connessioni possono essere non persistenti.
 - usare le classi Socket e ServerSocket per sviluppare il programma server
 - per inviare al server le richieste, utilizzare un qualsiasi browser
+
+## Assignment 8
+
+Scrivere un programma echo server usando la libreria java NIO e, in particolare, il Selector e canali in modalità non bloccante, e un programma echo client, usando NIO (va bene anche con modalità bloccante).
+
+- Il server accetta richieste di connessioni dai client, riceve messaggi inviati dai client e li rispedisce (eventualmente aggiungendo "echoed by server" al messaggio ricevuto).
+- Il client legge il messaggio da inviare da console, lo invia al server e visualizza quanto ricevuto dal server.
