@@ -11,8 +11,10 @@ public class MainClass {
             System.out.println("Usage: Mainclass <message to send>");
             return;
         }
-
-        assert messageToSend != null;
+        if (messageToSend.equals("")) {
+            System.out.println("Il messaggio non può essere vuoto");
+            return;
+        }
 
         new Thread(new Client(messageToSend)).start();
     }

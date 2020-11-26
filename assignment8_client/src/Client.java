@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
  * Created by alessiomatricardi on 25/11/20
  */
 public class Client implements Runnable {
-    private static int SERVER_PORT = 2500;
+    private static final int SERVER_PORT = 2500; // porta del server
     private String msg;
 
     public Client(String message) {
@@ -25,17 +25,15 @@ public class Client implements Runnable {
         try {
             socket = SocketChannel.open();
             InetSocketAddress address = new InetSocketAddress(SERVER_PORT);
-            socket.connect(address);
+            socket.connect(address); // bloccante
 
             byte[] byteMessage = msg.getBytes(StandardCharsets.UTF_8);
             ByteBuffer buffer = ByteBuffer.wrap(byteMessage);
-            int start = 0;
-            int len;
 
             socket.write(buffer);
             buffer.clear();
 
-            String readed = "";
+            String readed;
             System.out.println("Risposta del server:\n");
             while(socket.read(buffer) > 0) {
                 buffer.flip();
