@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Created by alessiomatricardi on 28/11/20
  */
 public class PingServer {
-    public static final int MAX_DELAY = 300; // 300 millisecondi
+    public static final int MAX_DELAY = 300; // ritardo di massimo 300 millisecondi
 
     public static void main(String[] args) {
         int port;
@@ -21,6 +21,7 @@ public class PingServer {
             System.out.println("ERR -arg 1");
             return;
         }
+
         DatagramSocket socket;
         try {
             socket = new DatagramSocket(port);
@@ -31,14 +32,13 @@ public class PingServer {
 
         byte[] buffer = new byte[150];
         DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
-        byte[] replyBuffer = "1".getBytes();
 
         try {
             while (true) {
                 socket.receive(receivePacket);
 
-                InetAddress clientAddress = receivePacket.getAddress();
-                int clientPort = receivePacket.getPort();
+                InetAddress clientAddress = receivePacket.getAddress(); // ip mittente
+                int clientPort = receivePacket.getPort(); // porta mittente
                 System.out.format("%s:%d> ", clientAddress.getHostAddress(), clientPort);
                 System.out.format("%s ACTION: ", new String(
                         receivePacket.getData(),
@@ -46,17 +46,18 @@ public class PingServer {
                         receivePacket.getLength(),
                         StandardCharsets.UTF_8)
                 );
-                if (getRandomNumber(1,4) == 1) {
+                if (getRandomNumber(1,4) == 1) { // Prob (numero = 1) = 0.25
                     System.out.println("not sent");
-                } else {
-                    int delay = getRandomNumber(1, MAX_DELAY);
+                } else { // Prob (numero > 1) = 0.75
+                    int delay = getRandomNumber(1, MAX_DELAY); // randomizzo delay
                     System.out.format("delayed %d ms\n", delay);
 
                     Thread.sleep(delay);
 
                     DatagramPacket sendPacket = new DatagramPacket(
-                            replyBuffer,
-                            replyBuffer.length,
+                            receivePacket.getData(),
+                            receivePacket.getOffset(),
+                            receivePacket.getLength(),
                             clientAddress,
                             clientPort
                     );
@@ -70,10 +71,10 @@ public class PingServer {
     }
 
     /**
-     * Restituisce un numero intero nell'intervallo [start, end]
+     * Restituisce un numero intero pseudocasuale nell'intervallo [start, end]
      * @param start the least value returned
      * @param end the upper bound (inclusive)
-     * @return random integer number in range [start, end]
+     * @return pseudorandom integer number in range [start, end]
      * */
     public static int getRandomNumber(int start, int end) {
         return ThreadLocalRandom.current().nextInt(start, end + 1);
