@@ -125,7 +125,7 @@ un messaggio di errore del tipo ERR -arg x, dove x è il numero
 dell'argomento.
 - utilizza una comunicazione UDP per comunicare con il server ed invia 10
 messaggi al server, con il seguente formato:
-PING seqno timestamp
+`PING seqno timestamp`
 in cui seqno è il numero di sequenza del PING (tra 0-9) ed il timestamp (in
 millisecondi) indica quando il messaggio è stato inviato
 - non invia un nuovo PING fino che non ha ricevuto l'eco del PING precedente,
@@ -135,10 +135,11 @@ risposta non è stata ricevuta entro 2 secondi
 - Dopo che ha ricevuto la decima risposta (o dopo il suo timeout), il client
 stampa un riassunto simile a quello stampato dal PING UNIX
 
-    ---- PING Statistics ----
-
-    10 packets transmitted, 7 packets received, 30% packet loss
-    round-trip (ms) min/avg/max = 63/190.29/290
+    `---- PING Statistics ----`
+    
+    `10 packets transmitted, 7 packets received, 30% packet loss`
+    
+    `round-trip (ms) min/avg/max = 63/190.29/290`
 
 - il RTT medio è stampato con 2 cifre dopo la virgola
 
@@ -156,3 +157,14 @@ casuale per simulare la latenza di rete
 - stampa l'indirizzo IP e la porta del client, il messaggio di PING e l'azione
 intrapresa dal server in seguito alla sua ricezione (PING non inviato,oppure
 PING ritardato di x ms).
+
+## Assignment 10
+
+Definire un Server TimeServer, che
+
+- invia su un gruppo di multicast  dategroup, ad intervalli regolari, la data e l’ora.  
+- attende tra un invio ed il successivo un intervallo di tempo simulata mediante il metodo  sleep().
+
+L’indirizzo IP di dategroup viene introdotto  da linea di comando.
+
+Definire quindi un client TimeClient che si unisce a dategroup e riceve, per dieci volte consecutive, data ed ora, le visualizza, quindi termina.
