@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 /**
  * Created by alessiomatricardi on 02/12/20
@@ -26,7 +25,7 @@ public class TimeClient {
             return;
         }
         if (!address.isMulticastAddress()) {
-            System.out.println("L'indirizzo non è multicast.");
+            System.out.println("L'indirizzo " + address.getHostAddress() + " non è multicast.");
             return;
         }
 

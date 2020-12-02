@@ -28,7 +28,7 @@ public class TimeServer {
             return;
         }
         if (!address.isMulticastAddress()) {
-            System.out.println("L'indirizzo non è multicast.");
+            System.out.println("L'indirizzo " + address.getHostAddress() + " non è multicast.");
             return;
         }
 
@@ -70,12 +70,12 @@ public class TimeServer {
 
     /**
      * Restituisce un numero intero pseudocasuale nell'intervallo [start, end]
-     * @param base the least value returned
-     * @param bound the upper bound (inclusive)
+     * @param start the least value returned
+     * @param end the upper bound (inclusive)
      * @return pseudorandom integer number in range [start, end]
      */
-    public static int getRandom(int base, int bound) {
-        return ThreadLocalRandom.current().nextInt(base, bound + 1);
+    public static int getRandom(int start, int end) {
+        return ThreadLocalRandom.current().nextInt(start, end + 1);
     }
 
 }
